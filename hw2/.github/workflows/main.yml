@@ -1,0 +1,57 @@
+name: Foundry Testing
+run-name: Homework 2 Running by ${{ github.actor }} 
+
+on:
+  push:
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: ci
+  WORKFLOW_NAME: Foundry Test on ${{ github.ref_name }}
+
+jobs:
+  check:
+    strategy:
+      fail-fast: true
+
+    name: Foundry Testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge tests
+        run: |
+          cd hw2
+          echo "${{ secrets.RPC_URL }}" >> .env
+          forge install
+          forge test --mt testExploit -vvv
+        id: test
+
+      - name: Python Configuration
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+        id: language
+    
+      - name: Dependencies Installation
+        run: |
+          pip install -r requirements.txt
+        id: install
+
+      - name: Run Python Script
+        run: |
+          python3 Arbitrage.py
+        id: script
