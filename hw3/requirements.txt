@@ -1,0 +1,9 @@
+yfinance
+numpy
+pandas
+matplotlib
+quantstats
+gurobipy
+ipython
+argparse
+scipy

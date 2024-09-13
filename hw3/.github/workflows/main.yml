@@ -1,0 +1,52 @@
+name: Introduction to Homework 3
+run-name: Homework 3 Running by ${{ github.actor }}
+
+on:
+  push:
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    strategy:
+      fail-fast: true
+
+    name: My portfolio
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Codebase
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Python Installation
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Package Installation
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Get Time
+        id: time
+        uses: nanzm/get-time-action@master
+        with:
+          timeZone: UTC+8
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Usage
+        env:
+          TIME: "${{ steps.time.outputs.time }}"
+        run: |
+          echo $TIME
+      
+      - name: Check Score
+        run: 
+          python Markowitz.py --score all && python Markowitz_2.py --score all
